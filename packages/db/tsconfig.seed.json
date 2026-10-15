@@ -1,0 +1,12 @@
+{
+  "extends": "@forms/config/tsconfig.node.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "prisma/seed.mts",
+    "prisma/demo-data.mts",
+    "prisma/recount.mts",
+    "prisma/counters.mts"
+  ]
+}

@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620" role="img" aria-labelledby="t d" font-family="'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif">
+  <title id="t">form-builder architecture</title>
+  <desc id="d">Authors and respondents use browsers that talk only to the Next.js server. Server components and server actions call the NestJS API with short-lived service tokens, forwarding the respondent's address for rate limiting. The builder, the respondent renderer and the API all run the same pure form-logic package. The API stores responses and their results counters in one Postgres transaction; Redis holds rate-limit counters and the cache for filtered results.</desc>
+  <style>
+    .bg { fill: #ffffff; }
+    .box { fill: #ffffff; stroke: #7c7f87; stroke-width: 1.5; }
+    .shared { fill: #eef2d6; stroke: #4d5c00; stroke-width: 1.5; }
+    .store { fill: #f5f5f2; stroke: #7c7f87; stroke-width: 1.5; }
+    .title { font-size: 16px; font-weight: 700; fill: #17181b; }
+    .sub { font-size: 12.5px; fill: #53565e; }
+    .mono { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11.5px; fill: #53565e; }
+    .edge { stroke: #53565e; stroke-width: 1.5; fill: none; }
+    .logic { stroke: #4d5c00; stroke-width: 2; fill: none; stroke-dasharray: 5 4; }
+    .label { font-size: 12px; fill: #17181b; }
+    .llabel { font-size: 12px; font-weight: 700; fill: #4d5c00; }
+    .head { fill: #53565e; }
+    .lhead { fill: #4d5c00; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #1b1b1d; }
+      .box { fill: #232326; stroke: #7a7c83; }
+      .shared { fill: #2e3410; stroke: #b9c95a; }
+      .store { fill: #2b2b2f; stroke: #7a7c83; }
+      .title, .label { fill: #ececee; }
+      .sub, .mono { fill: #a6a8ae; }
+      .edge { stroke: #a6a8ae; }
+      .head { fill: #a6a8ae; }
+      .logic { stroke: #b9c95a; }
+      .llabel { fill: #b9c95a; }
+      .lhead { fill: #b9c95a; }
+    }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 8 4 0 8z" class="head"/></marker>
+  </defs>
+  <rect class="bg" width="1000" height="620"/>
+
+  <!-- Browsers -->
+  <rect class="box" x="30" y="30" width="270" height="120" rx="3"/>
+  <text class="title" x="48" y="58">Author's browser</text>
+  <text class="sub" x="48" y="80">Builder: spine, logic gutter, inspector,</text>
+  <text class="sub" x="48" y="97">autosave with draft revision</text>
+  <text class="sub" x="48" y="114">Preview = the respondent renderer</text>
+  <text class="mono" x="48" y="136">no API token in browser JS</text>
+
+  <rect class="box" x="30" y="190" width="270" height="110" rx="16"/>
+  <text class="title" x="48" y="218">Respondent's browser</text>
+  <text class="sub" x="48" y="240">One question per screen, keycaps,</text>
+  <text class="sub" x="48" y="257">Back; mints the response id</text>
+  <text class="mono" x="48" y="282">crypto.randomUUID() = idempotency</text>
+
+  <!-- Web -->
+  <rect class="box" x="370" y="30" width="270" height="270" rx="3"/>
+  <text class="title" x="388" y="58">apps/web · Next.js 16</text>
+  <text class="sub" x="388" y="82">Server components read through the API</text>
+  <text class="sub" x="388" y="99">Server actions write through it</text>
+  <text class="sub" x="388" y="116">Auth.js session (JWT cookie)</text>
+  <text class="sub" x="388" y="140">Mints a 2-minute HS256 service token</text>
+  <text class="sub" x="388" y="157">per call; forwards x-forwarded-for</text>
+  <text class="sub" x="388" y="174">for anonymous respondents</text>
+  <text class="sub" x="388" y="198">CSV export: streams the API body</text>
+  <text class="sub" x="388" y="215">through, never buffers it</text>
+  <text class="mono" x="388" y="244">/forms/:id/edit  /forms/:id/results</text>
+  <text class="mono" x="388" y="262">/f/:slug  /status  /</text>
+
+  <!-- API -->
+  <rect class="box" x="710" y="30" width="260" height="270" rx="3"/>
+  <text class="title" x="728" y="58">apps/api · NestJS</text>
+  <text class="sub" x="728" y="82">SessionGuard (global, default closed)</text>
+  <text class="sub" x="728" y="99">then ThrottlerGuard: default budget,</text>
+  <text class="sub" x="728" y="116">+ auth / respond budgets</text>
+  <text class="sub" x="728" y="140">Forms: draft (409 on stale revision),</text>
+  <text class="sub" x="728" y="157">publish (422 with analyzer issues)</text>
+  <text class="sub" x="728" y="181">Respond: walk, validate, upsert,</text>
+  <text class="sub" x="728" y="198">counter deltas, one transaction</text>
+  <text class="sub" x="728" y="222">Results: counters, or GIN-filtered scan</text>
+  <text class="mono" x="728" y="250">/forms  /public  /health</text>
+  <text class="mono" x="728" y="268">CSV in pages of 500</text>
+
+  <!-- Shared logic -->
+  <rect class="shared" x="300" y="350" width="400" height="88" rx="3"/>
+  <text class="title" x="318" y="378">services/form-logic (pure, one copy)</text>
+  <text class="sub" x="318" y="400">evaluate · walk · navigator · validateSubmission · analyze</text>
+  <text class="mono" x="318" y="422">property test: navigator path == server walk</text>
+
+  <!-- Services -->
+  <rect class="box" x="730" y="350" width="240" height="88" rx="3"/>
+  <text class="title" x="748" y="378">services/analytics</text>
+  <text class="sub" x="748" y="400">responseDeltas · recount · SQL</text>
+  <text class="sub" x="748" y="417">services/response-export: CSV</text>
+
+  <!-- Stores -->
+  <rect class="store" x="370" y="490" width="330" height="110" rx="3"/>
+  <text class="title" x="388" y="518">PostgreSQL 16</text>
+  <text class="mono" x="388" y="540">forms · form_versions (immutable trigger)</text>
+  <text class="mono" x="388" y="558">responses (GIN answers, immutable once</text>
+  <text class="mono" x="388" y="576">submitted) · version/field/answer stats</text>
+
+  <rect class="store" x="730" y="490" width="240" height="110" rx="3"/>
+  <text class="title" x="748" y="518">Redis 7</text>
+  <text class="mono" x="748" y="540">throttle:{budget}:{caller}</text>
+  <text class="mono" x="748" y="558">results:v1:{version}:{filter}</text>
+  <text class="mono" x="748" y="576">  :{count}:{lastUpdate}</text>
+
+  <!-- Edges -->
+  <path class="edge" d="M300 90H370" marker-end="url(#a)"/>
+  <path class="edge" d="M300 245H335V200H370" marker-end="url(#a)"/>
+  <text class="label" x="306" y="82">HTTPS</text>
+  <path class="edge" d="M640 120H710" marker-end="url(#a)"/>
+  <text class="label" x="646" y="112">Bearer</text>
+  <text class="label" x="646" y="140">token</text>
+  <path class="edge" d="M840 300V350" marker-end="url(#a)"/>
+  <path class="edge" d="M800 300V470H600V490" marker-end="url(#a)"/>
+  <path class="edge" d="M950 300V490" marker-end="url(#a)"/>
+
+  <!-- The same logic in three places -->
+  <path class="logic" d="M165 150V170"/>
+  <path class="logic" d="M165 300V394H300"/>
+  <path class="logic" d="M505 300V350"/>
+  <path class="logic" d="M760 300V320H700V380"/>
+  <text class="llabel" x="40" y="330">same rules in the browser,</text>
+  <text class="llabel" x="40" y="347">the preview and the server</text>
+</svg>

@@ -1,0 +1,31 @@
+{
+  "name": "@forms/form-logic",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The form logic engine: condition evaluation, the respondent path, the navigator, submission validation and the publish-time analyzer. Pure; imported by the builder, the respondent renderer and the API.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@forms/shared": "workspace:*",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@forms/config": "workspace:*",
+    "@types/node": "^20.17.6",
+    "fast-check": "^3.23.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@forms/response-export",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CSV export of one form version's responses: columns from that version, RFC 4180 quoting, formula-injection guard, streamed.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@forms/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@forms/config": "workspace:*",
+    "@types/node": "^20.17.6",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}
