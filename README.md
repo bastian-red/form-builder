@@ -49,7 +49,7 @@ generated forms almost never left any. Now it asserts that the case it exists fo
 | A form cannot loop | `analyze.test.ts`; publishing a backward jump answers `422` naming the edge (`forms.test.ts`, E2E) |
 | Editing a form never rewrites an old response | responses pin `form_version_id`; a trigger refuses any `UPDATE` of a published version; per-version results and CSV (`versions.spec.ts`) |
 | A retried save is one row | 20 concurrent identical `PUT`s, one row (`respond.test.ts`) |
-| A submitted response is final | the upsert's `WHERE submitted_at IS NULL`, plus a trigger that refuses any later `UPDATE` |
+| A submitted response is final | the save locks the row and refuses a submitted one with `409` (an identical retry answers as it did), plus a trigger that refuses any later `UPDATE` (`respond.test.ts`) |
 | Two tabs never overwrite each other's draft | `PUT /forms/:id/draft` carries the revision it was based on, `409` otherwise (`forms.test.ts`, E2E) |
 | Results stay fast | 100,000 completed responses: unfiltered p95 **61–98 ms** (budget 150), filtered p95 **389–581 ms** (budget 1,500), measured across runs (`scale.test.ts`) |
 | The results counters never drift from the rows | after concurrent traffic, a full recount equals the incremental counters (`respond.test.ts`, property test in `counters.test.ts`) |
